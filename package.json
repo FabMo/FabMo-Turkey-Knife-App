@@ -1,0 +1,11 @@
+{
+  "name": "Turkey Knife",
+  "license": "MIT",
+  "main": "./index.html",
+  "icon": "icon.png",
+  "icon_color": "#9966CC",
+  "version": "0.0.1",
+  "author": "Ryan Sturmer",
+  "description": "Post Post",
+  "id":"fabmo-postpost-app"
+}

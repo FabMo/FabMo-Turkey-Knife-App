@@ -1,0 +1,196 @@
+<html>
+<head>
+  <title>Vibrating Turkey Knife</title>
+</head>
+
+<body>
+<form id="filesubmitform">
+  <p>
+    <input id="filepicker" name="file" type="file" />
+  </p>
+</form>
+<form>
+	Material Thickness:<br>
+	<input id='thickness' type="number" name="thickness" value="0" step="0.001" autocomplete="off"><br>
+	Max Stroke Length:<br>
+	<input id='stroke' type="text" name="stroke" value="0.05" step="0.001" autocomplete="off"><br>
+</form>
+<form>
+	<input type="radio" id="style" value="|/|/|/" checked> |/|/|/ <br>
+	<input type="radio" id="style" value="\|\|\|"> \|\|\| <br>
+</form>
+
+<script src="./fabmo.js"></script>
+
+    <script type="text/javascript">
+        
+        var fabmo = new FabMoDashboard();
+
+
+        function processFile(txt) {
+            
+			var currxpos = 0
+			
+			
+			var currypos = 0
+			var currzpos = 0
+			var newxpos = 0
+			var newypos = 0
+			var newzpos = 0
+			var dist = 0
+			var chunks = 0
+			var stroke = document.getElementById("stroke").value
+			var actstoke = 0
+			var strokeheight = document.getElementById("thickness").value*1.1
+			var nextxmove = 0
+			var nextymove = 0
+			var moveangle = 0
+			var endx = 0
+			var endy = 0
+			var xcenter = 0
+			var ycenter = 0
+			var path = 0
+			var direction = 0
+			var chord = 0
+			var cgangle = 0
+			var radius = 0
+			var chunkangle = 0
+			var phi = 0
+			var startangle = 0
+			var xoffset = 0
+			var yoffset = 0
+			var startx = 0
+			var starty = 0
+			var strokeone = 0
+			var stroketwo = 0
+			var strokestyle = document.getElementById("style").value
+			if (style = '|/|/|/') {
+			strokeone = strokeheight
+			stroketwo = 0
+			} else if (style = '\|\|\|') {
+			strokeone = 0
+			stroketwo = strokeheight
+			}
+			output = []
+				output.push('VR'+','+'400'+','+'400'+','+'400'+','+','+'400')
+				output.push('JS'+','+'8'+','+'8')
+				output.push('MS'+','+'6'+','+'6')
+            txt.split('\n').forEach(function(line, idx) {
+				if(line.substring(0,2) == 'J3') {
+					var positions = line.split(',')
+					currxpos = positions[1].trim()
+					currypos = positions[2].trim()
+					currzpos = positions[3].trim()
+					output.push(line)
+                } else if (line.substring(0,2) == 'M3') {
+					var positions = line.split(',')
+					newxpos = positions[1].trim()
+					newypos = positions[2].trim()
+					newzpos = positions[3].trim()
+				dist = Math.sqrt((newxpos*1-currxpos*1)**2+(newypos*1-currypos*1)**2);
+				if (dist*1 == 0) {
+				actstroke = 0;
+				chunks = 0;
+				} else {
+				chunks = Math.round(dist*1/stroke*1)+1;
+				}
+				moveangle = Math.atan2((newxpos*1-currxpos*1),(newypos*1-currypos*1))*(360/(2*Math.PI))
+				for (i = 0; i < chunks; i++){
+					nextxmove = (currxpos*1 + i*((newxpos-currxpos)/chunks));
+					nextymove = (currypos*1 + i*((newypos-currypos)/chunks));
+					output.push('M5' + ',' + nextxmove + ',' + nextymove + ',' + strokeone*1 + ',,' + moveangle);
+					output.push('M5' + ',' + nextxmove + ',' + nextymove + ',' + stroketwo*1 + ',,' + moveangle);
+				}
+					nextxmove = (newxpos);
+					nextymove = (newypos);
+					output.push('M5' + ',' + nextxmove + ',' + nextymove + ',' + strokeone*1 + ',,' + moveangle);
+					output.push('M5' + ',' + nextxmove + ',' + nextymove + ',' + stroketwo*1 + ',,' + moveangle);	
+				currxpos = newxpos;
+				currypos = newypos;
+				currzpos = newzpos;
+				} else if (line.substring(0,2) == 'CG') {
+					var positions = line.split(',')
+					endx = positions[2].trim()
+					endy = positions[3].trim()
+					xcenter = positions[4].trim()
+					ycenter = positions[5].trim()
+					chord = Math.sqrt((currxpos*1-endx*1)**2+(currypos*1-endy*1)**2)
+					radius = Math.sqrt((xcenter*1)**2+(ycenter*1)**2)
+					cgangle = 2*Math.asin(chord*1/(2*radius))
+					dist = radius*1*cgangle*1
+					chunks = Math.round(dist*1/stroke*1)+1;
+					chunkangle = cgangle*1/chunks*1
+					phi = Math.atan2((-xcenter*1),(-ycenter*1))
+					startx = currxpos*1
+					starty = currypos*1
+					for (i = 0; i < chunks*1; i++){
+					if(xcenter*1 >= 0 && ycenter*1 > 0) {
+					newxpos = (currxpos*1 + xcenter*1 - Math.sin(chunkangle*1+Math.atan2((xcenter*1),(ycenter*1)))*radius*1)
+					newypos = (currypos*1 + ycenter*1 - Math.cos(chunkangle*1+Math.atan2((xcenter*1),(ycenter*1)))*radius*1)
+					xcenter = currxpos*1 - newxpos*1 + xcenter*1
+					ycenter = currypos*1 - newypos*1 + ycenter*1
+					moveangle = Math.atan2((newxpos*1-currxpos*1),(newypos*1-currypos*1))*360/(2*Math.PI)
+					} else if (xcenter*1 < 0 && ycenter*1 >= 0) {
+					newxpos = (currxpos*1 + xcenter*1 + Math.cos(chunkangle*1+Math.atan2((ycenter*1),(-xcenter*1)))*radius*1)
+					newypos = (currypos*1 + ycenter*1 - Math.sin(chunkangle*1+Math.atan2((ycenter*1),(-xcenter*1)))*radius*1)
+					xcenter = currxpos*1 - newxpos*1 + xcenter*1
+					ycenter = currypos*1 - newypos*1 + ycenter*1
+					moveangle = Math.atan2((newxpos*1-currxpos*1),(newypos*1-currypos*1))*360/(2*Math.PI)
+					} else if (xcenter*1 > 0 && ycenter*1 <= 0) {
+					newxpos = (currxpos*1 + xcenter*1 - Math.cos(chunkangle*1+Math.atan2((-ycenter*1),(xcenter*1)))*radius*1)
+					newypos = (currypos*1 + ycenter*1 + Math.sin(chunkangle*1+Math.atan2((-ycenter*1),(xcenter*1)))*radius*1)
+					xcenter = currxpos*1 - newxpos*1 + xcenter*1
+					ycenter = currypos*1 - newypos*1 + ycenter*1
+					moveangle = -Math.atan2(-(newxpos*1-currxpos*1),(newypos*1-currypos*1))*360/(2*Math.PI)
+					} else if (xcenter*1 <= 0 && ycenter*1 < 0) {
+					newxpos = (currxpos*1 + xcenter*1 + Math.sin(chunkangle*1+Math.atan2((-xcenter*1),(-ycenter*1)))*radius*1)
+					newypos = (currypos*1 + ycenter*1 + Math.cos(chunkangle*1+Math.atan2((-xcenter*1),(-ycenter*1)))*radius*1)
+					xcenter = currxpos*1 - newxpos*1 + xcenter*1
+					ycenter = currypos*1 - newypos*1 + ycenter*1
+					moveangle = -Math.atan2(-(newxpos*1-currxpos*1),(newypos*1-currypos*1))*360/(2*Math.PI)
+					}					
+					output.push('M5' + ',' + newxpos + ',' + newypos + ',' + strokeone*1 + ',,' + moveangle);
+					output.push('M5' + ',' + newxpos + ',' + newypos + ',' + stroketwo*1 + ',,' + moveangle);
+					currxpos = newxpos;
+					currypos = newypos;
+					currzpos = newzpos;
+					}
+                } else if (line.substring(0,2) == 'JZ') {
+					output.push(line)
+				} else if (line.substring(0,2) !== 'J3'  && line.substring(0,2) !== 'M3' && line.substring(0,2) !== 'CG') {
+					output.push(line)
+				} else {
+                    output.push('');
+                }
+							
+            });
+				output.push('VR'+','+'25'+','+'25'+','+'25'+','+','+'25')
+				output.push('JS'+','+'3'+','+'2')
+				output.push('MS'+','+'2'+','+'1')
+            return output.join('\n');
+        }
+
+        document.forms['filesubmitform'].elements['filepicker'].onchange = function(evt) {
+            if(!window.FileReader) return; // Browser is not compatible
+            var reader = new FileReader();
+            reader.onload = function(evt) {
+                if(evt.target.readyState != 2) return;
+                if(evt.target.error) {
+                    alert('Error while reading file');
+                    return;
+                }
+
+                fabmo.submitJob({
+                        file : processFile(evt.target.result), 
+                    filename : 'file.sbp',
+                        name : 'Post post demo',
+                    description : 'Just a silly example'
+                });
+            };
+
+            reader.readAsText(evt.target.files[0]);
+        };
+    </script>
+    </body>
+
+</html>
