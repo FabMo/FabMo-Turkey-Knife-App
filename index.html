@@ -41,10 +41,11 @@
 			var chunks = 0
 			var stroke = document.getElementById("stroke").value
 			var actstoke = 0
-			var strokeheight = document.getElementById("thickness").value*1.1
+			var strokeheight = document.getElementById("thickness").value*-1.1
 			var nextxmove = 0
 			var nextymove = 0
 			var moveangle = 0
+			var newmoveangle = 0
 			var endx = 0
 			var endy = 0
 			var xcenter = 0
@@ -65,14 +66,14 @@
 			var stroketwo = 0
 			var strokestyle = document.getElementById("style").value
 			if (style = '|/|/|/') {
-			strokeone = strokeheight
-			stroketwo = 0
-			} else if (style = '\|\|\|') {
 			strokeone = 0
 			stroketwo = strokeheight
+			} else if (style = '\|\|\|') {
+			strokeone = strokeheight
+			stroketwo = 0
 			}
 			output = []
-				output.push('VR'+','+'400'+','+'400'+','+'400'+','+','+'400')
+				output.push('VR'+','+'600'+','+'600'+','+'600'+','+','+'600')
 				output.push('JS'+','+'8'+','+'8')
 				output.push('MS'+','+'6'+','+'6')
             txt.split('\n').forEach(function(line, idx) {
@@ -94,7 +95,16 @@
 				} else {
 				chunks = Math.round(dist*1/stroke*1)+1;
 				}
-				moveangle = Math.atan2((newxpos*1-currxpos*1),(newypos*1-currypos*1))*(360/(2*Math.PI))
+				newmoveangle = Math.atan2((newxpos*1-currxpos*1),(newypos*1-currypos*1))*(360/(2*Math.PI))
+				if (newmoveangle*1 < 0) {
+					newmoveangle = newmoveangle + 360
+				}	
+				if (Math.abs(moveangle*1 - newmoveangle*1) > 45) {
+				moveangle = newmoveangle	
+				output.push('M5' + ',' + nextxmove + ',' + nextymove + ',' + 0.1 + ',,');
+				output.push('J5' + ',,,,,' + moveangle);
+				}
+				moveangle = newmoveangle
 				for (i = 0; i < chunks; i++){
 					nextxmove = (currxpos*1 + i*((newxpos-currxpos)/chunks));
 					nextymove = (currypos*1 + i*((newypos-currypos)/chunks));
@@ -129,26 +139,62 @@
 					newypos = (currypos*1 + ycenter*1 - Math.cos(chunkangle*1+Math.atan2((xcenter*1),(ycenter*1)))*radius*1)
 					xcenter = currxpos*1 - newxpos*1 + xcenter*1
 					ycenter = currypos*1 - newypos*1 + ycenter*1
-					moveangle = Math.atan2((newxpos*1-currxpos*1),(newypos*1-currypos*1))*360/(2*Math.PI)
+					newmoveangle = Math.atan2((newxpos*1-currxpos*1),(newypos*1-currypos*1))*(360/(2*Math.PI))
+					if (newmoveangle*1 < 0) {
+					newmoveangle = newmoveangle + 360
+					}	
+					if (Math.abs(moveangle*1 - newmoveangle*1) > 45) {
+					moveangle = newmoveangle	
+					output.push('M5' + ',' + nextxmove + ',' + nextymove + ',' + 0.1 + ',,');
+					output.push('J5' + ',,,,,' + moveangle);
+					}
+					moveangle = newmoveangle
 					} else if (xcenter*1 < 0 && ycenter*1 >= 0) {
 					newxpos = (currxpos*1 + xcenter*1 + Math.cos(chunkangle*1+Math.atan2((ycenter*1),(-xcenter*1)))*radius*1)
 					newypos = (currypos*1 + ycenter*1 - Math.sin(chunkangle*1+Math.atan2((ycenter*1),(-xcenter*1)))*radius*1)
 					xcenter = currxpos*1 - newxpos*1 + xcenter*1
 					ycenter = currypos*1 - newypos*1 + ycenter*1
-					moveangle = Math.atan2((newxpos*1-currxpos*1),(newypos*1-currypos*1))*360/(2*Math.PI)
+					newmoveangle = Math.atan2((newxpos*1-currxpos*1),(newypos*1-currypos*1))*(360/(2*Math.PI))
+					if (newmoveangle*1 < 0) {
+					newmoveangle = newmoveangle + 360
+					}	
+					if (Math.abs(moveangle*1 - newmoveangle*1) > 45) {
+					moveangle = newmoveangle	
+					output.push('M5' + ',' + nextxmove + ',' + nextymove + ',' + 0.1 + ',,');
+					output.push('J5' + ',,,,,' + moveangle);
+					}
+					moveangle = newmoveangle
 					} else if (xcenter*1 > 0 && ycenter*1 <= 0) {
 					newxpos = (currxpos*1 + xcenter*1 - Math.cos(chunkangle*1+Math.atan2((-ycenter*1),(xcenter*1)))*radius*1)
 					newypos = (currypos*1 + ycenter*1 + Math.sin(chunkangle*1+Math.atan2((-ycenter*1),(xcenter*1)))*radius*1)
 					xcenter = currxpos*1 - newxpos*1 + xcenter*1
 					ycenter = currypos*1 - newypos*1 + ycenter*1
-					moveangle = -Math.atan2(-(newxpos*1-currxpos*1),(newypos*1-currypos*1))*360/(2*Math.PI)
+					newmoveangle = Math.atan2((newxpos*1-currxpos*1),(newypos*1-currypos*1))*(360/(2*Math.PI))
+					if (newmoveangle*1 < 0) {
+					newmoveangle = newmoveangle + 360
+					}	
+					if (Math.abs(moveangle*1 - newmoveangle*1) > 45) {
+					moveangle = newmoveangle	
+					output.push('M5' + ',' + nextxmove + ',' + nextymove + ',' + 0.1 + ',,');
+					output.push('J5' + ',,,,,' + moveangle);
+					}
+					moveangle = newmoveangle
 					} else if (xcenter*1 <= 0 && ycenter*1 < 0) {
 					newxpos = (currxpos*1 + xcenter*1 + Math.sin(chunkangle*1+Math.atan2((-xcenter*1),(-ycenter*1)))*radius*1)
 					newypos = (currypos*1 + ycenter*1 + Math.cos(chunkangle*1+Math.atan2((-xcenter*1),(-ycenter*1)))*radius*1)
 					xcenter = currxpos*1 - newxpos*1 + xcenter*1
 					ycenter = currypos*1 - newypos*1 + ycenter*1
-					moveangle = -Math.atan2(-(newxpos*1-currxpos*1),(newypos*1-currypos*1))*360/(2*Math.PI)
-					}					
+					newmoveangle = Math.atan2((newxpos*1-currxpos*1),(newypos*1-currypos*1))*(360/(2*Math.PI))
+					if (newmoveangle*1 < 0) {
+					newmoveangle = newmoveangle + 360
+					}	
+					if (Math.abs(moveangle*1 - newmoveangle*1) > 45) {
+					moveangle = newmoveangle	
+					output.push('M5' + ',' + nextxmove + ',' + nextymove + ',' + 0.1 + ',,');
+					output.push('J5' + ',,,,,' + moveangle);
+					}
+					moveangle = newmoveangle
+					}			
 					output.push('M5' + ',' + newxpos + ',' + newypos + ',' + strokeone*1 + ',,' + moveangle);
 					output.push('M5' + ',' + newxpos + ',' + newypos + ',' + stroketwo*1 + ',,' + moveangle);
 					currxpos = newxpos;
