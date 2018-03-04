@@ -11,9 +11,9 @@
 </form>
 <form>
 	Material Thickness:<br>
-	<input id='thickness' type="number" name="thickness" value="0" step="0.001" autocomplete="off"><br>
+	<input id='thickness' type="number" name="thickness" value="0.1" step="0.001" autocomplete="off"><br>
 	Max Stroke Length:<br>
-	<input id='stroke' type="text" name="stroke" value="0.05" step="0.001" autocomplete="off"><br>
+	<input id='stroke' type="text" name="stroke" value="0.02" step="0.001" autocomplete="off"><br>
 </form>
 
 <script src="./fabmo.js"></script>
@@ -26,8 +26,6 @@
         function processFile(txt) {
             
 			var currxpos = 0
-			
-			
 			var currypos = 0
 			var currzpos = 0
 			var newxpos = 0
@@ -60,11 +58,16 @@
 			var starty = 0
 			var strokeone = 0
 			var stroketwo = 0
-			var retract = 0
+			var drop = 0
+			var retract = strokeheight*1+stroke*1+(stroke*1/Math.tan(0.35))
+			strokeheight = (document.getElementById("thickness").value*-1)-(stroke*1/Math.tan(0.35))					
+			stroke = document.getElementById("stroke").value*1
+			strokeone = retract*1
+			stroketwo = strokeheight*1
 
 			output = []
 				output.push('VR'+','+'600'+','+'600'+','+'600'+','+','+'600')
-				output.push('JS'+','+'8'+','+'8')
+				output.push('JS'+','+'2'+','+'2')
 				output.push('MS'+','+'6'+','+'6')
             txt.split('\n').forEach(function(line, idx) {
 				if(line.substring(0,2) == 'J3') {
@@ -72,28 +75,42 @@
 					currxpos = positions[1].trim()
 					currypos = positions[2].trim()
 					currzpos = positions[3].trim()
+					nextxmove = positions[1].trim()
+					nextymove = positions[2].trim()
 					output.push(line)
 				} else if (line.substring(0,5) == '&Tool') {
 					if (line.substring (7,8) == '2') {
-					strokeheight = document.getElementById("thickness").value*-0.25
+					strokeheight = document.getElementById("thickness").value*-0.4
 					stroke = document.getElementById("stroke").value
 					strokeone = strokeheight
 					stroketwo = strokeheight
+					output.push('VR'+','+'25'+','+'25'+','+'25'+','+','+'25')
+					output.push('JS'+','+'2'+','+'2')
+					output.push('MS'+','+'0.75'+','+'0.75')
 					} else if (line.substring (7,8) == '3') {
 					strokeheight = document.getElementById("thickness").value*-1.1
 					stroke = stroke = document.getElementById("stroke").value
 					strokeone = strokeheight
 					stroketwo = strokeheight
+					output.push('VR'+','+'25'+','+'25'+','+'25'+','+','+'25')
+					output.push('JS'+','+'2'+','+'2')
+					output.push('MS'+','+'1.5'+','+'1.5')
 					} else if (line.substring (7,8) == '4') {
 					strokeheight = (document.getElementById("thickness").value*-1)-(stroke*1/Math.tan(0.35))
 					stroke = document.getElementById("stroke").value * 2.5
 					strokeone = retract
 					stroketwo = strokeheight
+					output.push('VR'+','+'600'+','+'600'+','+'600'+','+','+'600')
+					output.push('JS'+','+'2'+','+'2')
+					output.push('MS'+','+'6'+','+'6')
 					} else {
 					strokeheight = (document.getElementById("thickness").value*-1)-(stroke*1/Math.tan(0.35))					
 					stroke = document.getElementById("stroke").value
 					strokeone = retract
 					stroketwo = strokeheight
+					output.push('VR'+','+'600'+','+'600'+','+'600'+','+','+'600')
+					output.push('JS'+','+'2'+','+'2')
+					output.push('MS'+','+'6'+','+'6')
 					}
                 } else if (line.substring(0,2) == 'M3') {
 					var positions = line.split(',')
@@ -109,12 +126,12 @@
 				}
 				newmoveangle = Math.atan2((newxpos*1-currxpos*1),(newypos*1-currypos*1))*(360/(2*Math.PI))
 				if (newmoveangle*1 < 0) {
-					newmoveangle = newmoveangle + 360
+					newmoveangle = newmoveangle*1 + 360
 				}	
 				if (Math.abs(moveangle*1 - newmoveangle*1) > 45) {
 				moveangle = newmoveangle	
 				output.push('M5' + ',' + nextxmove + ',' + nextymove + ',' + 0.1 + ',,');
-				output.push('J5' + ',' + nextxmove + ',' + nextymove + ',' + 0.1 +',' + moveangle);
+				output.push('J5' + ',,,' + 0.1 +',' + moveangle);
 				}
 				moveangle = newmoveangle
 				for (i = 0; i < chunks; i++){
