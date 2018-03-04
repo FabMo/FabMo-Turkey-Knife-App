@@ -15,10 +15,6 @@
 	Max Stroke Length:<br>
 	<input id='stroke' type="text" name="stroke" value="0.05" step="0.001" autocomplete="off"><br>
 </form>
-<form>
-	<input type="radio" id="style" value="|/|/|/" checked> |/|/|/ <br>
-	<input type="radio" id="style" value="\|\|\|"> \|\|\| <br>
-</form>
 
 <script src="./fabmo.js"></script>
 
@@ -41,7 +37,7 @@
 			var chunks = 0
 			var stroke = document.getElementById("stroke").value
 			var actstoke = 0
-			var strokeheight = document.getElementById("thickness").value*-1.1
+			var strokeheight = (document.getElementById("thickness").value*-1)-(stroke*1/Math.tan(0.35))
 			var nextxmove = 0
 			var nextymove = 0
 			var moveangle = 0
@@ -64,14 +60,8 @@
 			var starty = 0
 			var strokeone = 0
 			var stroketwo = 0
-			var strokestyle = document.getElementById("style").value
-			if (style = '|/|/|/') {
-			strokeone = 0
-			stroketwo = strokeheight
-			} else if (style = '\|\|\|') {
-			strokeone = strokeheight
-			stroketwo = 0
-			}
+			var retract = 0
+
 			output = []
 				output.push('VR'+','+'600'+','+'600'+','+'600'+','+','+'600')
 				output.push('JS'+','+'8'+','+'8')
@@ -83,6 +73,28 @@
 					currypos = positions[2].trim()
 					currzpos = positions[3].trim()
 					output.push(line)
+				} else if (line.substring(0,5) == '&Tool') {
+					if (line.substring (7,8) == '2') {
+					strokeheight = document.getElementById("thickness").value*-0.25
+					stroke = document.getElementById("stroke").value
+					strokeone = strokeheight
+					stroketwo = strokeheight
+					} else if (line.substring (7,8) == '3') {
+					strokeheight = document.getElementById("thickness").value*-1.1
+					stroke = stroke = document.getElementById("stroke").value
+					strokeone = strokeheight
+					stroketwo = strokeheight
+					} else if (line.substring (7,8) == '4') {
+					strokeheight = (document.getElementById("thickness").value*-1)-(stroke*1/Math.tan(0.35))
+					stroke = document.getElementById("stroke").value * 2.5
+					strokeone = retract
+					stroketwo = strokeheight
+					} else {
+					strokeheight = (document.getElementById("thickness").value*-1)-(stroke*1/Math.tan(0.35))					
+					stroke = document.getElementById("stroke").value
+					strokeone = retract
+					stroketwo = strokeheight
+					}
                 } else if (line.substring(0,2) == 'M3') {
 					var positions = line.split(',')
 					newxpos = positions[1].trim()
@@ -102,7 +114,7 @@
 				if (Math.abs(moveangle*1 - newmoveangle*1) > 45) {
 				moveangle = newmoveangle	
 				output.push('M5' + ',' + nextxmove + ',' + nextymove + ',' + 0.1 + ',,');
-				output.push('J5' + ',,,,,' + moveangle);
+				output.push('J5' + ',' + nextxmove + ',' + nextymove + ',' + 0.1 +',' + moveangle);
 				}
 				moveangle = newmoveangle
 				for (i = 0; i < chunks; i++){
@@ -111,10 +123,6 @@
 					output.push('M5' + ',' + nextxmove + ',' + nextymove + ',' + strokeone*1 + ',,' + moveangle);
 					output.push('M5' + ',' + nextxmove + ',' + nextymove + ',' + stroketwo*1 + ',,' + moveangle);
 				}
-					nextxmove = (newxpos);
-					nextymove = (newypos);
-					output.push('M5' + ',' + nextxmove + ',' + nextymove + ',' + strokeone*1 + ',,' + moveangle);
-					output.push('M5' + ',' + nextxmove + ',' + nextymove + ',' + stroketwo*1 + ',,' + moveangle);	
 				currxpos = newxpos;
 				currypos = newypos;
 				currzpos = newzpos;
@@ -146,7 +154,7 @@
 					if (Math.abs(moveangle*1 - newmoveangle*1) > 45) {
 					moveangle = newmoveangle	
 					output.push('M5' + ',' + nextxmove + ',' + nextymove + ',' + 0.1 + ',,');
-					output.push('J5' + ',,,,,' + moveangle);
+					output.push('J5' + ',' + nextxmove + ',' + nextymove + ',' + 0.1 +',' + moveangle);
 					}
 					moveangle = newmoveangle
 					} else if (xcenter*1 < 0 && ycenter*1 >= 0) {
@@ -161,7 +169,7 @@
 					if (Math.abs(moveangle*1 - newmoveangle*1) > 45) {
 					moveangle = newmoveangle	
 					output.push('M5' + ',' + nextxmove + ',' + nextymove + ',' + 0.1 + ',,');
-					output.push('J5' + ',,,,,' + moveangle);
+					output.push('J5' + ',' + nextxmove + ',' + nextymove + ',' + 0.1 +',' + moveangle);
 					}
 					moveangle = newmoveangle
 					} else if (xcenter*1 > 0 && ycenter*1 <= 0) {
@@ -176,7 +184,7 @@
 					if (Math.abs(moveangle*1 - newmoveangle*1) > 45) {
 					moveangle = newmoveangle	
 					output.push('M5' + ',' + nextxmove + ',' + nextymove + ',' + 0.1 + ',,');
-					output.push('J5' + ',,,,,' + moveangle);
+					output.push('J5' + ',' + nextxmove + ',' + nextymove + ',' + 0.1 +',' + moveangle);
 					}
 					moveangle = newmoveangle
 					} else if (xcenter*1 <= 0 && ycenter*1 < 0) {
@@ -191,7 +199,7 @@
 					if (Math.abs(moveangle*1 - newmoveangle*1) > 45) {
 					moveangle = newmoveangle	
 					output.push('M5' + ',' + nextxmove + ',' + nextymove + ',' + 0.1 + ',,');
-					output.push('J5' + ',,,,,' + moveangle);
+					output.push('J5' + ',' + nextxmove + ',' + nextymove + ',' + 0.1 +',' + moveangle);
 					}
 					moveangle = newmoveangle
 					}			
